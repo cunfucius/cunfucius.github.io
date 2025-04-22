@@ -1,5 +1,5 @@
 ---
-title: "Math 437 Projec"
+title: "Math 437 Project"
 
 ---
 
