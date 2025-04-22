@@ -11,7 +11,7 @@ website:
     right:
       - href: newtab.qmd
         text: Math 437 Project
-        icon: megaphone
+        icon: clipboard-data
     tools: 
       - icon: github
         link: https://github.com/cunfucius
