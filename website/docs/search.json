@@ -54,5 +54,26 @@
     "title": "new tab",
     "section": "",
     "text": "This page will contain my Math 437 final project."
+  },
+  {
+    "objectID": "docs/index.html",
+    "href": "docs/index.html",
+    "title": "Angelina",
+    "section": "",
+    "text": "A little bit about me and my life."
+  },
+  {
+    "objectID": "docs/index.html#education",
+    "href": "docs/index.html#education",
+    "title": "Angelina",
+    "section": "Education",
+    "text": "Education\nUniversity of XYZ, City | Location | Sept 20XX - June 20XX"
+  },
+  {
+    "objectID": "docs/index.html#experience",
+    "href": "docs/index.html#experience",
+    "title": "Angelina",
+    "section": "Experience",
+    "text": "Experience\nWorkplace | Job title | April 20XX - present"
   }
 ]

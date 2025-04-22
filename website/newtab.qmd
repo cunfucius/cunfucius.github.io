@@ -1,5 +1,6 @@
 ---
-title: "new tab"
+title: "Math 437 Projec"
+
 ---
 
 This page will contain my Math 437 final project.
