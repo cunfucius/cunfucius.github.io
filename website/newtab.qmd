@@ -1,0 +1,5 @@
+---
+title: "new tab"
+---
+
+{{<lipsum 1>}}
