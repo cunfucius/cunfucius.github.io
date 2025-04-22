@@ -17,10 +17,10 @@ website:
       
 format:
   html:
-    backgroundcolor: "#eaffee"
-    fontcolor: "darkgreen"
+    backgroundcolor: "#cfd8dc"
+    fontcolor: "#37474f"
     linkcolor: "black"
-    maintfont: "monospace"
+    mainfont: "monospace"
     fontsize: 20px
     theme: [cosmo, styles.scss]
-
+    
