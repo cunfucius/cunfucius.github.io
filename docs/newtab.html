@@ -20,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -69,7 +103,7 @@ ul.task-list li input[type="checkbox"] {
 
 
 <meta property="og:title" content="Math 437 Project – Home">
-<meta property="og:description" content="">
+<meta property="og:description" content="UFC Data Dive">
 <meta property="og:site_name" content="Home">
 </head>
 
@@ -114,6 +148,7 @@ ul.task-list li input[type="checkbox"] {
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
 <h1 class="title">Math 437 Project</h1>
+<p class="subtitle lead">UFC Data Dive</p>
 </div>
 
 
@@ -131,8 +166,524 @@ ul.task-list li input[type="checkbox"] {
 
 
 <p>This page will contain my Math 437 final project.</p>
+<section id="motivation-and-context" class="level2">
+<h2 class="anchored" data-anchor-id="motivation-and-context">Motivation and Context</h2>
+<p>I’ve always been into UFC — it’s something I grew up watching with my dad and brothers, and Saturday night fights became kind of a tradition in our house. The UFC (Ultimate Fighting Championship) is the largest professional organization in the world for mixed martial arts (MMA), where fighters compete using a combination of striking and grappling techniques from various combat sports like boxing, wrestling, Muay Thai, and Brazilian jiu-jitsu.</p>
+<p>Over time, I started noticing how some matchups felt more “predictable” than others, not just based on who was more hyped or popular, but based on things like reach, stamina, or how good someone’s ground game was. That’s what made me wonder: is there a way to use actual stats to predict who’s more likely to win a fight?</p>
+<p>This project is a chance for me to explore that idea through data. I’m using real UFC fight stats to see if we can predict winners based on measurable differences between fighters — like who has better striking accuracy, more fight experience, or stronger takedown defense. I think it’s cool to combine something I’ve always been interested about with the skills I’ve been learning.</p>
+<p>Besides just being interesting to me, this kind of analysis could be useful for coaches, fighters, sports analysts, and even fans who love debating fight outcomes. Even betting markets or commentators might benefit from knowing what stats may matter when it comes to winning a fight; it overlaps with how sportsbooks and bettors think. Oddsmakers set betting lines based on a combination of stats, trends, and public perception and sharp bettors look for mismatches between the odds and what the data suggests. By building models that identify which stats actually matter, we might find undervalued fighters or better understand why certain odds are set the way they are. Even if we’re not trying to beat the bookies, it’s interesting to explore how predictive analytics aligns (or doesn’t) with betting markets.</p>
+<p>That said, I also recognize that MMA is unpredictable. One well-timed punch, an unexpected submission, or even a bad judging decision can swing the outcome of a fight. No model can account for everything — and part of what makes UFC exciting is that there’s always a bit of chaos. But if we can better understand the patterns behind consistent wins and losses, I think we can at least shift the odds a little more in our favor.</p>
+<p>My goal is to take all these raw stats and figure out what they’re really telling us about the chances of a fighter coming out on top.</p>
+</section>
+<section id="main-objective" class="level2">
+<h2 class="anchored" data-anchor-id="main-objective">Main Objective</h2>
+<p>The main goal of this project is to build a predictive model that can estimate the probability of a fighter winning a UFC match based on measurable stats. I’m focusing on using pre-fight data — like striking accuracy, takedown defense, fight history, and physical attributes — to see how well we can predict the outcome before the fight happens.</p>
+<p>While the primary focus is on prediction, I also want to explore which factors are most important in influencing those predictions. For example, does having a longer reach actually help? Do knockdowns matter more than takedowns? Or is fight experience the biggest difference-maker? By building the model and looking at how different variables contribute to it, I hope to find out which stats are the most useful when it comes to winning a fight.</p>
+<p>In the end, the goal isn’t to perfectly guess every winner — that’s not realistic in a sport with so much unpredictability. But if we can consistently identify what gives fighters the edge, we can start making more informed predictions, and maybe even better understand how UFC matchups play out.</p>
+</section>
+<section id="packages-used-in-this-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="packages-used-in-this-analysis">Packages Used In This Analysis</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(here)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rsample)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(naniar)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(janitor)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(recipes)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidymodels)  <span class="co"># for modeling pipeline (individual parts listed below)</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(yardstick)   </span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(parsnip)    </span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(workflows)   </span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(vip)         </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Package</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="https://github.com/jennybc/here_here">here</a></td>
+<td>to easily load and save data</td>
+</tr>
+<tr class="even">
+<td><a href="https://readr.tidyverse.org/">readr</a></td>
+<td>to import the CSV file data</td>
+</tr>
+<tr class="odd">
+<td><a href="https://dplyr.tidyverse.org/">dplyr</a></td>
+<td>to massage and summarize data</td>
+</tr>
+<tr class="even">
+<td><a href="https://rsample.tidymodels.org/">rsample</a></td>
+<td>to split data into training and test sets</td>
+</tr>
+<tr class="odd">
+<td><a href="https://ggplot2.tidyverse.org/">ggplot2</a></td>
+<td>to create nice-looking and informative graphs</td>
+</tr>
+<tr class="even">
+<td><a href="https://naniar.njtierney.com/">naniar</a></td>
+<td>to summarize and visualize missing data</td>
+</tr>
+<tr class="odd">
+<td><a href="https://sfirke.github.io/janitor/">janitor</a></td>
+<td>to clean column names and spot duplicates/inconsistencies</td>
+</tr>
+<tr class="even">
+<td><a href="https://recipes.tidymodels.org/">recipes</a></td>
+<td>to preprocess data (e.g., normalize, impute, encode)</td>
+</tr>
+<tr class="odd">
+<td><a href="https://parsnip.tidymodels.org/">parsnip</a></td>
+<td>to define models (e.g., logistic regression, random forest)</td>
+</tr>
+<tr class="even">
+<td><a href="https://workflows.tidymodels.org/">workflows</a></td>
+<td>to bundle modeling and preprocessing into one object</td>
+</tr>
+<tr class="odd">
+<td><a href="https://yardstick.tidymodels.org/">yardstick</a></td>
+<td>to measure model performance (accuracy, AUC, etc.)</td>
+</tr>
+<tr class="even">
+<td><a href="https://github.com/koalaverse/vip">vip</a></td>
+<td>to generate variable importance plots</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Note: While many of these packages come from the tidyverse and tidymodels ecosystems, they’re listed individually to clarify their specific roles in the analysis, as recommended…</li>
+</ul>
+</section>
+<section id="data-description" class="level2">
+<h2 class="anchored" data-anchor-id="data-description">Data Description</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ufc <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"C:/Users/CSUFTitan/Documents/Math 437/Data/large_dataset.csv"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The dataset used in this analysis comes from Kaggle, where a user compiled UFC fight statistics by scraping data directly from UFCStats.com — the official statistics provider for the UFC, basically the official record book and data hub for everything UFC. The scraper was custom-built using Python and BeautifulSoup, and the full scraping code is publicly available on Kaggle, confirming that the data is pulled directly from the source. This is the kaggle dataset link: https://www.kaggle.com/datasets/maksbasher/ufc-complete-dataset-all-events-1996-2024/data and this is the link to their scraper: https://www.kaggle.com/code/maksbasher/large-dataset-scraper-all-fights</p>
+<p>The dataset includes UFC fights ranging from 1996 to March 2024, based on all completed events listed on UFCStats at the time the scraper was run. This provides a wide historical view of UFC matchups and fighter performance over time. Also a note, the dataset only includes fights that have a definite winner - there are no fights within the dataset that have draws. In total, the dataset includes over 7,000 fights and 95 variables, capturing both fight-level and fighter-level information. Each row represents one fight, these include:</p>
+<ul>
+<li><p>Fight-specific details like event name, weight class, method of victory, number of rounds, and time.</p></li>
+<li><p>Fighter performance stats such as significant strikes, takedowns, submissions, and control time.</p></li>
+<li><p>Fighter attributes including age, height, reach, stance, and overall win/loss records.</p></li>
+<li><p>Calculated differences between the Red and Blue fighters for various stats (e.g., reach_diff, str_acc_diff). All fighter differences are calculated as “Red Corner - Blue Corner,” allowing for direct comparisons between the two opponents. These differences include metrics such as striking accuracy difference, takedown accuracy difference, and total wins/losses difference, allowing for easy side-by-side comparison; a positive value suggests the Red fighter has a longer reach, while a negative value indicates the Blue fighter has the advantage.</p></li>
+<li><p>Note that measurements (height &amp; reach) are by CM, weight is measured in KG and time is measured in seconds.</p></li>
+</ul>
+<section id="data-limitations" class="level3">
+<h3 class="anchored" data-anchor-id="data-limitations">Data Limitations</h3>
+<p>While the UFC dataset provides a large and detailed collection of fight statistics, there are several limitations that should be considered when interpreting any results. First, the dataset spans fights from 1996 to 2024, but the UFC has evolved significantly during that time. Changes in judging criteria, rule enforcement, and even how certain statistics are recorded mean that older fights may not be directly comparable to more recent ones. This introduces potential bias if the entire dataset is modeled as if all fights occurred under the same conditions. For greater consistency, it may be better to focus on fights from a more recent era, such as post-2015, where rules and data collection may have became more standardized.</p>
+<p>Another issue involves fighter attributes like age, height, and reach. These values appear to be assigned statically, meaning a fighter’s current or initial stats are applied to all their fights. For instance, a fighter listed as 34 years old may appear that way in fights that occurred ten years earlier. This is especially problematic for age, which is known to impact endurance and performance. Ideally, age should be calculated based on the fighter’s date of birth and the actual date of the fight.</p>
+<p>In addition, the dataset lacks important qualitative information that often influences fight outcomes. Factors like injuries, short-notice fights, or last-minute weight cuts aren’t captured. This means a statistically superior fighter might lose due to context-specific issues that the model can’t see. Furthermore, many fights are decided by judges, and judging can be subjective or controversial. A fighter may statistically outperform their opponent but still lose a decision, which adds noise to the “winner” label used in prediction.</p>
+<p>Finally, the dataset doesn’t account for career stages or fighter rankings. Fights between debuting athletes may look very different statistically from fights between top contenders, but the model treats all of them the same unless filtered by criteria like weight class or fight type. These limitations highlight the importance of interpreting model results carefully and being transparent about what the data can and cannot reveal.</p>
+</section>
+</section>
+<section id="data-wrangling-optional-section" class="level2">
+<h2 class="anchored" data-anchor-id="data-wrangling-optional-section">Data Wrangling (Optional Section)</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ufc_recent <span class="ot">&lt;-</span> ufc <span class="sc">|&gt;</span> <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">4441</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># fights from 2015 onward, decided to focus on the "modern" era...rules up-to-date, less missing/incomplete data. also more "recent"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Missingness summary</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#computes the percentage of missing values for each column in dataset</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#summary shows the exact number of missing values (n_miss) and the percentage of missing values (pct_miss) for each variable/column.</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>ufc_recent <span class="sc">|&gt;</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">miss_var_summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 95 × 3
+   variable   n_miss pct_miss
+   &lt;chr&gt;       &lt;int&gt;    &lt;num&gt;
+ 1 reach_diff    143    3.22 
+ 2 b_reach        99    2.23 
+ 3 r_reach        44    0.991
+ 4 referee        24    0.540
+ 5 b_stance       16    0.360
+ 6 r_stance        5    0.113
+ 7 event_name      0    0    
+ 8 r_fighter       0    0    
+ 9 b_fighter       0    0    
+10 winner          0    0    
+# ℹ 85 more rows</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">vis_miss</span>(ufc_recent, <span class="at">sort_miss =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="newtab_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gg_miss_upset</span>(ufc_recent, <span class="at">nsets =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="newtab_files/figure-html/unnamed-chunk-5-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a> ufc_recent <span class="ot">&lt;-</span> ufc_recent <span class="sc">|&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(r_stance), <span class="sc">!</span><span class="fu">is.na</span>(b_stance), <span class="sc">!</span><span class="fu">is.na</span>(referee)) <span class="co">#drop rows with NA values - less than 1% missing data</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Start clean from the full imputed data</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>ufc_recent <span class="ot">&lt;-</span> ufc_recent<span class="sc">|&gt;</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(winner <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Red"</span>, <span class="st">"Blue"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">win_red =</span> <span class="fu">factor</span>(<span class="fu">ifelse</span>(winner <span class="sc">==</span> <span class="st">"Red"</span>, <span class="dv">1</span>, <span class="dv">0</span>), <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Blue"</span>, <span class="st">"Red"</span>)))</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">#Dropping categorical missings costs almost nothing and avoids weird “Unknown” patterns.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Impute r_reach and b_reach using KNN , data is 1-2% missing</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>impute_recipe <span class="ot">&lt;-</span> <span class="fu">recipe</span>(win_red <span class="sc">~</span> ., <span class="at">data =</span> ufc_recent) <span class="sc">|&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">update_role</span>(event_name, r_fighter, b_fighter, winner, <span class="at">new_role =</span> <span class="st">"id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_impute_knn</span>(r_reach, b_reach)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>prep_impute <span class="ot">&lt;-</span> <span class="fu">prep</span>(impute_recipe)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>ufc_imputed <span class="ot">&lt;-</span> <span class="fu">bake</span>(prep_impute, <span class="at">new_data =</span> <span class="cn">NULL</span>)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>ufc_imputed <span class="ot">&lt;-</span> ufc_imputed <span class="sc">|&gt;</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">reach_diff =</span> r_reach <span class="sc">-</span> b_reach)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Make sure the outcome is a factor</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>ufc_imputed <span class="ot">&lt;-</span> ufc_imputed <span class="sc">|&gt;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(winner <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Red"</span>, <span class="st">"Blue"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">win_red =</span> <span class="fu">factor</span>(<span class="fu">ifelse</span>(winner <span class="sc">==</span> <span class="st">"Red"</span>, <span class="dv">1</span>, <span class="dv">0</span>), <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Blue"</span>, <span class="st">"Red"</span>))</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Set seed for reproducibility</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(ufc_imputed)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>train_indices <span class="ot">&lt;-</span> <span class="fu">sample</span>(n, <span class="at">size =</span> <span class="fu">floor</span>(<span class="fl">0.8</span> <span class="sc">*</span> n))</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Split the dataset into training and test sets</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span> ufc_imputed[train_indices, ]</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>test_data <span class="ot">&lt;-</span> ufc_imputed[<span class="sc">-</span>train_indices, ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>After filtering for fights from 2015 onward, the dataset was found to be largely complete, with under 3.5% missingness in any individual variable. For the few variables with missing data, I used context-driven approaches. Numeric variables like r_reach and b_reach were imputed using k-nearest neighbors (KNN) to preserve the relationships between fighters’ physical stats. The reach_diff variable, which is derived from those columns, was recalculated post-imputation to ensure consistency. Low-missing categorical variables like stance and rows missing referee were dropped instead of encoding it as unknown to avoid introducing noise.</p>
+<p>Also, since we are predicting the winner of a UFC fight based on fighter statistics, it is essential to split the data into a training and test set to ensure the model generalizes well to new fights. Without this split, the model could overfit, meaning it would perform well on past fights but struggle to predict future ones. By using an 80/20 split, where 80% of the data is used for training and 20% is reserved for testing, we can evaluate the model’s accuracy on unseen data and ensure it makes reliable predictions.</p>
+</section>
+<section id="exploratory-data-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="exploratory-data-analysis">Exploratory Data Analysis</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Distribution of Fight Outcomes (Target Variable)</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>ufc_imputed <span class="sc">|&gt;</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(win_red))) <span class="sc">+</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">fill =</span> <span class="st">"darkred"</span>) <span class="sc">+</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Red Fighter Won (1 = Yes)"</span>, <span class="at">y =</span> <span class="st">"Number of Fights"</span>,</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Distribution of Fight Outcomes"</span>) <span class="sc">+</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="newtab_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Univariate Distributions of Difference Variables</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>ufc_imputed <span class="sc">|&gt;</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(age_diff, reach_diff, td_diff, sig_str_acc_diff, ctrl_sec_diff, sig_str_acc_total_diff),</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">"variable"</span>, <span class="at">values_to =</span> <span class="st">"value"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> value)) <span class="sc">+</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">30</span>, <span class="at">fill =</span> <span class="st">"lightblue"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> variable, <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Distributions of Key Difference Variables"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="newtab_files/figure-html/unnamed-chunk-9-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Boxplots of Differences by Outcome</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>ufc_imputed <span class="sc">|&gt;</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(reach_diff, sig_str_acc_diff, td_diff, age_diff, ctrl_sec_diff, sig_str_acc_total_diff),</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">"variable"</span>, <span class="at">values_to =</span> <span class="st">"value"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(win_red), <span class="at">y =</span> value, <span class="at">fill =</span> <span class="fu">factor</span>(win_red))) <span class="sc">+</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> variable, <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Red Win"</span>, <span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">title =</span> <span class="st">"Difference Variables by Outcome"</span>) <span class="sc">+</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">fill =</span> <span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="newtab_files/figure-html/unnamed-chunk-9-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Raw Fighter Stats (Red Corner) by Outcome</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>ufc_imputed <span class="sc">|&gt;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(r_sig_str_acc_total, r_td_avg, r_str_def_total),</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">"stat"</span>, <span class="at">values_to =</span> <span class="st">"value"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> value, <span class="at">fill =</span> <span class="fu">factor</span>(win_red))) <span class="sc">+</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">alpha =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> stat, <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Red Fighter Stats by Outcome"</span>, <span class="at">fill =</span> <span class="st">"Red Win"</span>) <span class="sc">+</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="newtab_files/figure-html/unnamed-chunk-9-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Categorical Variable Analysis</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>ufc_imputed <span class="sc">|&gt;</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> weight_class, <span class="at">fill =</span> <span class="fu">factor</span>(win_red))) <span class="sc">+</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">position =</span> <span class="st">"fill"</span>) <span class="sc">+</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Win Proportion by Weight Class"</span>, <span class="at">y =</span> <span class="st">"Proportion"</span>, <span class="at">fill =</span> <span class="st">"Red Win"</span>) <span class="sc">+</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="newtab_files/figure-html/unnamed-chunk-9-5.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Exploring Nonlinearities (Age Difference)</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>ufc_imputed <span class="sc">|&gt;</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">age_bin =</span> <span class="fu">cut</span>(age_diff, <span class="at">breaks =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="sc">-</span><span class="dv">5</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="cn">Inf</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> age_bin, <span class="at">fill =</span> <span class="fu">factor</span>(win_red))) <span class="sc">+</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">position =</span> <span class="st">"fill"</span>) <span class="sc">+</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Proportion of Wins by Age Difference Bin"</span>, <span class="at">x =</span> <span class="st">"Age Difference Bin"</span>, <span class="at">y =</span> <span class="st">"Proportion"</span>) <span class="sc">+</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="newtab_files/figure-html/unnamed-chunk-9-6.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Interactions: Reach Difference and Weight Class</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>ufc_imputed <span class="sc">|&gt;</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> reach_diff, <span class="at">fill =</span> <span class="fu">factor</span>(win_red))) <span class="sc">+</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">alpha =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> weight_class, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Reach Difference by Outcome across Weight Classes"</span>, <span class="at">x =</span> <span class="st">"Reach Difference"</span>) <span class="sc">+</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Groups with fewer than two data points have been dropped.
+Groups with fewer than two data points have been dropped.
+Groups with fewer than two data points have been dropped.
+Groups with fewer than two data points have been dropped.
+Groups with fewer than two data points have been dropped.
+Groups with fewer than two data points have been dropped.
+Groups with fewer than two data points have been dropped.
+Groups with fewer than two data points have been dropped.
+Groups with fewer than two data points have been dropped.
+Groups with fewer than two data points have been dropped.
+Groups with fewer than two data points have been dropped.
+Groups with fewer than two data points have been dropped.
+Groups with fewer than two data points have been dropped.
+Groups with fewer than two data points have been dropped.
+Groups with fewer than two data points have been dropped.
+Groups with fewer than two data points have been dropped.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+-Inf
+Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+-Inf
+Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+-Inf
+Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+-Inf
+Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+-Inf
+Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+-Inf
+Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+-Inf
+Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+-Inf
+Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+-Inf
+Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+-Inf
+Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+-Inf
+Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+-Inf
+Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+-Inf
+Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+-Inf
+Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+-Inf
+Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+-Inf</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="newtab_files/figure-html/unnamed-chunk-9-7.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>To begin exploring the dataset, I visualized the distribution of the target variable, win_red, which indicates whether the red corner fighter won the bout. The bar chart reveals that red fighters win more often than blue fighters in this dataset, with a modest class imbalance that should be noted when modeling.</p>
+<p>Next, I examined the distributions of several key “difference” variables—such as age_diff, reach_diff, td_diff, ctrl_sec_diff, sig_str_acc_diff, and sig_str_acc_total_diff. These variables represent differences between red and blue fighters and are good candidates for predictive modeling, as they encode head-to-head advantages. Most of these variables were roughly symmetric and centered around zero, as expected from paired differences. However, some (like ctrl_sec_diff) showed skewness, and others like sig_str_acc_diff included extreme values such as -1, reflecting instances where one fighter landed no significant strikes. These values likely occur in very short fights or UFC debuts and may warrant further consideration or capping in modeling; some values approached +1 or -1, which raised red flags. After investigating further, I realized this variable was calculated using in-fight statistics — meaning it reflects what happened during the fight, not before. Including it in a predictive model would introduce data leakage since we wouldn’t know these values before the fight actually occurred. So when modeling I will use sig_str_acc_total_diff instead, which captures historical striking accuracy leading into the fight, and is more appropriate for predictive modeling.</p>
+<p>To explore relationships with the outcome, I used boxplots to compare the same difference variables across win/loss outcomes. Variables such as ctrl_sec_diff and td_diff showed visible shifts depending on the winner, suggesting predictive potential. Meanwhile, differences like age_diff and reach_diff appeared more subtle and might interact with other factors like weight class or require non-linear treatment.</p>
+<p>To dive deeper into those possibilities, I plotted red fighter statistics (e.g., r_sig_str_acc_total, r_str_def_total, and r_td_avg) by win outcome using density plots. While the distributions are fairly overlapping, red winners tended to have slightly higher values across all three metrics, especially in defensive and grappling stats.</p>
+<p>Categorical variables like weight_class were also explored. A stacked bar chart showed that the likelihood of a red win varies across weight classes, with some divisions showing strong red-side trends. This suggests a potential arena for interaction effects or confounding from matchup dynamics.</p>
+<p>Finally, I explored non-linear patterns by binning age_diff and plotting win proportions across bins. Older red fighters (especially 5+ years older than their opponent) appear to have lower win rates, hinting at diminishing returns with age. For interaction effects, I facet-plotted reach difference distributions by weight class, colored by win outcome. Some classes (e.g., Featherweight or Middleweight) showed clearer separation between winners and losers, indicating that the predictive value of reach may be more relevant in specific divisions.</p>
+<p>Together, these plots helped identify promising predictors, revealed potential non-linear or interaction effects, and raised considerations for handling edge cases in modeling. The next steps will focus on refining the feature set and fitting appropriate predictive models.</p>
+</section>
+<section id="modeling" class="level2">
+<h2 class="anchored" data-anchor-id="modeling">Modeling</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidymodels)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Set roles and select predictor variables</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>log_recipe <span class="ot">&lt;-</span> <span class="fu">recipe</span>(win_red <span class="sc">~</span> age_diff <span class="sc">+</span> reach_diff <span class="sc">+</span> td_diff <span class="sc">+</span> ctrl_sec_diff <span class="sc">+</span> sig_str_acc_total_diff,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>                     <span class="at">data =</span> train_data) <span class="sc">|&gt;</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_normalize</span>(<span class="fu">all_numeric_predictors</span>())</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Model specification</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>logistic_mod <span class="ot">&lt;-</span> <span class="fu">logistic_reg</span>() <span class="sc">|&gt;</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"glm"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"classification"</span>)</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Workflow</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>logistic_wf <span class="ot">&lt;-</span> <span class="fu">workflow</span>() <span class="sc">|&gt;</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_recipe</span>(log_recipe) <span class="sc">|&gt;</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_model</span>(logistic_mod)</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit model</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>logistic_fit <span class="ot">&lt;-</span> <span class="fu">fit</span>(logistic_wf, <span class="at">data =</span> train_data)</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Predictions on test set</span></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>log_predictions <span class="ot">&lt;-</span> <span class="fu">predict</span>(logistic_fit, <span class="at">new_data =</span> test_data, <span class="at">type =</span> <span class="st">"prob"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_cols</span>(<span class="fu">predict</span>(logistic_fit, <span class="at">new_data =</span> test_data)) <span class="sc">|&gt;</span></span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_cols</span>(test_data <span class="sc">|&gt;</span> <span class="fu">select</span>(win_red))</span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Evaluate</span></span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>log_predictions <span class="sc">|&gt;</span> <span class="fu">metrics</span>(<span class="at">truth =</span> win_red, <span class="at">estimate =</span> .pred_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 3
+  .metric  .estimator .estimate
+  &lt;chr&gt;    &lt;chr&gt;          &lt;dbl&gt;
+1 accuracy binary         0.689
+2 kap      binary         0.356</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ROC AUC</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>log_predictions <span class="sc">|&gt;</span> <span class="fu">roc_auc</span>(<span class="at">truth =</span> win_red, .pred_Red)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 3
+  .metric .estimator .estimate
+  &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
+1 roc_auc binary         0.237</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Confusion matrix</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>log_predictions <span class="sc">|&gt;</span> <span class="fu">conf_mat</span>(<span class="at">truth =</span> win_red, <span class="at">estimate =</span> .pred_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          Truth
+Prediction Blue Red
+      Blue  217 105
+      Red   169 389</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Random Forest model spec</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>rf_mod <span class="ot">&lt;-</span> <span class="fu">rand_forest</span>(<span class="at">mtry =</span> <span class="dv">3</span>, <span class="at">trees =</span> <span class="dv">500</span>, <span class="at">min_n =</span> <span class="dv">5</span>) <span class="sc">|&gt;</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"ranger"</span>, <span class="at">importance =</span> <span class="st">"impurity"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"classification"</span>)</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Same preprocessing recipe as before</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>rf_recipe <span class="ot">&lt;-</span> <span class="fu">recipe</span>(win_red <span class="sc">~</span> age_diff <span class="sc">+</span> reach_diff <span class="sc">+</span> td_diff <span class="sc">+</span> ctrl_sec_diff <span class="sc">+</span> sig_str_acc_total_diff,</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>                    <span class="at">data =</span> train_data) <span class="sc">|&gt;</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_normalize</span>(<span class="fu">all_numeric_predictors</span>())</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Workflow</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>rf_wf <span class="ot">&lt;-</span> <span class="fu">workflow</span>() <span class="sc">|&gt;</span></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_recipe</span>(rf_recipe) <span class="sc">|&gt;</span></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_model</span>(rf_mod)</span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit the random forest model</span></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>rf_fit <span class="ot">&lt;-</span> <span class="fu">fit</span>(rf_wf, <span class="at">data =</span> train_data)</span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Predictions</span></span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>rf_preds <span class="ot">&lt;-</span> <span class="fu">predict</span>(rf_fit, <span class="at">new_data =</span> test_data, <span class="at">type =</span> <span class="st">"prob"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_cols</span>(<span class="fu">predict</span>(rf_fit, <span class="at">new_data =</span> test_data)) <span class="sc">|&gt;</span></span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_cols</span>(test_data <span class="sc">|&gt;</span> <span class="fu">select</span>(win_red))</span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Accuracy, ROC AUC, etc.</span></span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a>rf_preds <span class="sc">|&gt;</span> <span class="fu">metrics</span>(<span class="at">truth =</span> win_red, <span class="at">estimate =</span> .pred_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 3
+  .metric  .estimator .estimate
+  &lt;chr&gt;    &lt;chr&gt;          &lt;dbl&gt;
+1 accuracy binary         0.668
+2 kap      binary         0.318</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>rf_preds <span class="sc">|&gt;</span> <span class="fu">roc_auc</span>(<span class="at">truth =</span> win_red, .pred_Red)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 3
+  .metric .estimator .estimate
+  &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
+1 roc_auc binary         0.262</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>rf_preds <span class="sc">|&gt;</span> <span class="fu">conf_mat</span>(<span class="at">truth =</span> win_red, <span class="at">estimate =</span> .pred_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          Truth
+Prediction Blue Red
+      Blue  220 126
+      Red   166 368</code></pre>
+</div>
+</div>
+<p>In this section, I built and evaluated two classification models to predict whether the Red corner fighter wins a given UFC fight, using fight-level differences in physical attributes and performance metrics. The models I chose are logistic regression and random forest—two commonly used methods for classification problems with different strengths.</p>
+<p>Model 1: Logistic Regression Logistic regression is a linear model that estimates the probability of a binary outcome—in this case, whether the Red fighter wins (1) or not (0). It models the log-odds of the outcome as a linear combination of the predictors. This method is straightforward, interpretable, and serves as a strong baseline.</p>
+<p>Model 2: Random Forest Random forest is an ensemble model that builds many decision trees and combines them by averaging (for regression) or voting (for classification). It’s good at capturing nonlinear relationships and interactions automatically. I used the ranger engine to fit the model efficiently with 500 trees, using 3 variables at each split (mtry = 3).</p>
+<p>Both models used the same set of predictors, selected from earlier EDA: - age_diff - reach_diff - td_diff (takedown attempts difference) - ctrl_sec_diff (control time difference) - sig_str_acc_total_diff (significant strike accuracy difference over career)</p>
+<p>All numeric predictors were normalized using step_normalize() in a recipe() to ensure fair scaling, especially for logistic regression.</p>
+<p>After fitting each model, I predicted outcomes on the test set and evaluated the models using three standard classification metrics: accuracy, ROC AUC, and the confusion matrix. Accuracy measures the overall percentage of correct predictions. ROC AUC (Area Under the Receiver Operating Characteristic Curve) evaluates how well the model separates positive from negative cases, regardless of the chosen cutoff. Confusion Matrix breaks down the performance into True Positives (TP), True Negatives (TN), False Positives (FP), and False Negatives (FN), which helps understand what kind of mistakes the model makes.</p>
+<p>Both models performed similarly, with logistic regression having a slight edge in raw accuracy and the random forest showing slightly more discrimination (AUC). However, both models struggled to confidently separate winners from losers based on the variables provided. Future improvements could involve feature engineering (e.g., removing in-fight variables like ctrl_sec_diff to avoid data leakage), including historical performance trends, and possibly tuning or ensembling models. ## Insights</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>rf_fit <span class="sc">%&gt;%</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">extract_fit_parsnip</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  vip<span class="sc">::</span><span class="fu">vip</span>(<span class="at">num_features =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="newtab_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The primary finding from this project is that while some fighter-level differences (such as reach and age) show moderate patterns with fight outcomes, they alone are not strong predictors of who wins a UFC fight. My models logistic regression and random forest — achieved around 67–69% accuracy, which is slightly better than guessing but not strong enough for high-stakes prediction or decision-making.</p>
+<p>One of the clearest patterns observed during exploratory analysis was that fighters with longer reach and better historical strike accuracy were slightly more likely to win, especially in certain weight classes. This was visualized through boxplots and density plots where red fighters had higher values in reach_diff and sig_str_acc_total_diff more often when they won.</p>
+<p>However, the models’ low ROC AUC scores (around 0.24–0.26) suggest that the predictive signal from these variables is weak when applied to new data. This implies that either (1) the features used do not capture the full complexity of UFC outcomes, or (2) there may be a lot of randomness or hidden contextual factors (like strategy, corner advice, injuries, or judging biases) that aren’t captured in the stats alone. Also when it came to random forest tree, the difference that came out important was the control variable; this suggests that winning a fight may be more closely tied to a fighter’s ability to control their opponent.</p>
+<p>Despite the weak prediction performance, this project shows that modeling fight outcomes is feasible with public stats, and that certain differences (like control time, takedowns, and reach) do relate to success — just not strongly enough in isolation to make reliable predictions.</p>
+<section id="limitations-and-future-work" class="level3">
+<h3 class="anchored" data-anchor-id="limitations-and-future-work">Limitations and Future Work</h3>
+</section>
+<section id="reflection-optional-subsection" class="level3">
+<h3 class="anchored" data-anchor-id="reflection-optional-subsection">Reflection (Optional Subsection)</h3>
 
 
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
