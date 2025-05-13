@@ -26,7 +26,6 @@ My goal is to take all these raw stats and figure out what they’re really tell
 #| echo: false
 #| message: false
 
-# change this to the location of your Quarto file containing your project; then delete this comment
 here::i_am("newtab.qmd")
 ```
 
